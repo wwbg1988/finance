@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackbeard.common.mapper.web.CurrencyConfigExMapper">
+
+	<select id="findBy" parameterType="com.blackbeard.common.dto.CurrencyConfigDto"
+		resultType="com.blackbeard.common.dto.CurrencyConfigDto">
+		SELECT
+		id as id,
+		currency as currency,
+		is_enable as isEnable,
+		currency_rates as currencyRates 
+		FROM
+		t_currency_config
+        where stat=1 
+        <if test="currencyConfigDto.currency!=null and currencyConfigDto.currency!=''">
+        and currency = #{currencyConfigDto.currency}
+        </if>
+        <if test="currencyConfigDto.isEnable!=null">
+        and is_enable = #{currencyConfigDto.isEnable} 
+        </if>
+        <if test="currencyConfigDto.id!=null and currencyConfigDto.id!=''">
+        and id = #{currencyConfigDto.id}
+        </if>
+	</select>
+
+
+
+
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackbeard.common.mapper.web.UserLoginStateExMapper">
+
+	<insert id="addUserLogin" parameterType="com.blackbeard.common.dto.UserLoginStateDto">
+		INSERT INTO
+		t_user_login_state (
+		user_name,
+		mt4_id,
+		blance,
+		amount,
+		create_time,
+		user_id,
+		stat
+		)
+		VALUES
+		(
+		#{userLoginStateDto.userName},
+		#{userLoginStateDto.mt4Id},
+		#{userLoginStateDto.blance},
+		#{userLoginStateDto.amount},
+		#{userLoginStateDto.createTime},
+		#{userLoginStateDto.userId},
+		1
+		)
+	</insert>
+
+	<select id="findBy" parameterType="com.blackbeard.common.dto.UserLoginStateDto"
+		resultType="com.blackbeard.common.dto.UserLoginStateDto">
+		SELECT
+		id as id,
+		user_name as userName,
+		mt4_id as mt4Id,
+		blance as blance,
+		amount as amount,
+		create_time as createTime,
+		user_id as userId
+		FROM
+		t_user_login_state
+		where
+		1=1 and stat=1
+		<if
+			test="userLoginStateDto.userName!=null and userLoginStateDto.userName!='' ">
+			and user_name = #{userLoginStateDto.userName}
+		</if>
+		<if test="userLoginStateDto.mt4Id!=null">
+		    and mt4_id = #{userLoginStateDto.mt4Id}
+		</if>
+		<if test="userLoginStateDto.userId!=null and userLoginStateDto.userId!=''">
+		    and user_id = #{userLoginStateDto.userId}
+		</if>
+	</select>
+
+	<update id="editUserLoginAmount" parameterType="com.blackbeard.common.dto.UserLoginStateDto">
+		update
+		t_user_login_state set amount =amount+1,update_time = #{userLoginStateDto.updateTime} where
+		stat=1 and
+		user_name = #{userLoginStateDto.userName}
+	</update>
+
+
+	<update id="reduceUserAmount" parameterType="com.blackbeard.common.dto.UserLoginStateDto">
+		update
+		t_user_login_state set amount =amount-1 ,update_time = #{userLoginStateDto.updateTime} where
+		stat=1 and
+		user_name = #{userLoginStateDto.userName}
+	</update>
+
+	<update id="delUserStateByAmount">
+		update t_user_login_state set stat=0 where amount=0
+		and stat=1
+	</update>
+
+	<update id="reduceUserBlance" parameterType="com.blackbeard.common.dto.UserLoginStateDto">
+		UPDATE
+		t_user_login_state
+		SET blance = blance - #{userLoginStateDto.blance}
+		WHERE
+		 mt4_id = #{userLoginStateDto.mt4Id}
+		AND stat = 1
+	</update>
+    
+    <update id="updateBlance" parameterType="com.blackbeard.common.dto.UserLoginStateDto">
+       update t_user_login_state set blance=#{userLoginStateDto.blance}  where mt4_id = #{userLoginStateDto.mt4Id}
+    </update>
+
+</mapper>

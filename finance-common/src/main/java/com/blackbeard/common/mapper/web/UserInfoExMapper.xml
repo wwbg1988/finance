@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackbeard.common.mapper.web.UserInfoExMapper">
+
+	<select id="findBy" parameterType="com.blackbeard.common.dto.UserInfoDto"
+		resultType="com.blackbeard.common.dto.UserInfoDto">
+		select
+		USER_ID as id,
+		USERNAME as userName,
+		PASSWORD as userPassword,
+		EMAIL as userMail,
+		mt4_id as mt4Id,
+		mt4_user_group as mt4UserGroup,
+		user_state as userState,
+		blance as
+		blance,
+		certificate_no as certificateNo,
+		certificate_url as
+		certificateUrl,
+		PHONE as userTelphone
+		from sys_user
+		where   user_state!=0  
+		<if test="userInfoDto.userName!=null and userInfoDto.userName!='' ">
+			and USERNAME = #{userInfoDto.userName}
+		</if>
+		<if test="userInfoDto.id!=null and userInfoDto.id!=''">
+			and USER_ID = #{userInfoDto.id}
+		</if>
+		<if test="userInfoDto.star!=null and userInfoDto.star!=''and userInfoDto.end!=null and userInfoDto.end!=''">
+			limit #{userInfoDto.star},#{userInfoDto.end}
+		</if>
+	</select>
+
+	<update id="updateUserByHistory">
+
+		UPDATE sys_user a,
+		t_user_login_state b
+		SET a.blance
+		= b.blance
+		WHERE
+		a.USER_ID = b.user_id
+		and
+		b.stat=1
+
+	</update>
+
+    <update id="updateOnLine" parameterType="com.blackbeard.common.dto.UserInfoDto">
+        update sys_user set user_state=2 ,LAST_LOGIN = #{userInfoDto.lastLogin}  where  USERNAME = #{userInfoDto.userName}
+    </update>
+    
+    <update id="updateOutLine" parameterType="com.blackbeard.common.dto.UserInfoDto">
+       update sys_user set user_state=3 where  USERNAME = #{userInfoDto.userName}
+    </update>
+
+
+</mapper>

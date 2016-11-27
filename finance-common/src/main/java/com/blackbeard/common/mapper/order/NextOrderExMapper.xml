@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackbeard.common.mapper.order.NextOrderExMapper">
+
+	<select id="findBy" parameterType="com.blackbeard.common.dto.NextOrderDto" resultType="com.blackbeard.common.dto.NextOrderDto">
+
+		SELECT
+		login_id as loginId ,
+		currency_type as currencyType,
+		direction as
+		direction,
+		price as price,
+		tick as tick,
+		open_time as openTime,
+		close_time as closeTime,
+		total as total,
+		`comment` as comment
+		FROM
+		t_next_order
+		where stat=1
+		<if test="nextOrderDto.tick!= null and nextOrderDto.tick!='' ">
+			and tick = #{nextOrderDto.tick}
+		</if>
+		<if test="nextOrderDto.currencyType!=null and nextOrderDto.currencyType!='' ">
+		    and currency_type = #{nextOrderDto.currencyType}
+		</if>
+		<if test="nextOrderDto.closeTime!= null and nextOrderDto.closeTime!='' ">
+			and close_time &lt;= #{nextOrderDto.closeTime}
+		</if>
+
+	</select>
+
+	<insert id="addNextOrder" parameterType="com.blackbeard.common.dto.NextOrderDto">
+		INSERT INTO t_next_order
+		(
+		login_id ,
+		currency_type,
+		direction,
+		price,
+		tick,
+		open_time,
+		close_time,
+		total,
+		`comment`,
+		stat,
+		create_time, 
+		USER_ID
+		)
+		VALUES
+		(
+		#{nextOrderDto.loginId},
+		#{nextOrderDto.currencyType},
+		#{nextOrderDto.direction},
+		#{nextOrderDto.price},
+		#{nextOrderDto.tick},
+		#{nextOrderDto.openTime},
+		#{nextOrderDto.closeTime},
+		#{nextOrderDto.total},
+		#{nextOrderDto.comment},
+		1,
+		#{nextOrderDto.createTime},
+		(
+		SELECT
+		a.USER_ID
+		FROM
+		sys_user a
+		WHERE
+		 a.mt4_id = #{nextOrderDto.loginId}
+		 )
+		)
+	</insert>
+	
+	<update id="reduceNextOrder" parameterType="com.blackbeard.common.dto.NextOrderDto">
+	    update t_next_order set stat=0 where tick = #{nextOrderDto.tick}
+	</update>
+
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackbeard.common.mapper.order.HistoryOrderExMapper">
+
+	<select id="findBy" parameterType="com.blackbeard.common.dto.HistoryOrderDto"
+		resultType="com.blackbeard.common.dto.HistoryOrderDto">
+		SELECT
+		a.id as id,
+		a.close_price as closePrice,
+		a.close_time as
+		closeTime,
+		a.cmd as cmd,
+		a.`comment` as comment ,
+		a.login_id as loginId,
+		a.open_price as openPrice,
+		a.open_time as openTime,
+		a.profit as profit,
+		a.symbol as symbol,
+		a.tick as tick
+		FROM
+		t_history_order a
+		where a.stat=1
+		<if test="historyOrderDto.id!=null and historyOrderDto.id!=''">
+			and a.id = #{historyOrderDto.id}
+		</if>
+		<if test="historyOrderDto.tick!=null and historyOrderDto.tick!=''">
+			and a.tick = #{historyOrderDto.tick}
+		</if>
+		<if test="historyOrderDto.symbol!=null and historyOrderDto.symbol!=''">
+			and a.symbol = #{historyOrderDto.symbol}
+		</if>
+	</select>
+
+
+
+	<insert id="addHistoryOrder" parameterType="com.blackbeard.common.dto.HistoryOrderDto">
+		INSERT into
+		t_history_order (
+		close_price,
+		close_time,
+		cmd,
+		`comment`,
+		login_id,
+		open_price,
+		open_time,
+		profit,
+		symbol,
+		tick,
+		total ,
+		user_id,
+		create_time,
+		stat)
+		VALUES(
+		#{historyOrderDto.closePrice},
+		#{historyOrderDto.closeTime},
+		#{historyOrderDto.cmd},
+		#{historyOrderDto.comment},
+		#{historyOrderDto.loginId},
+		#{historyOrderDto.openPrice},
+		#{historyOrderDto.openTime},
+		#{historyOrderDto.profit},
+		#{historyOrderDto.symbol},
+		#{historyOrderDto.tick},
+		#{historyOrderDto.total},
+		(
+		SELECT
+		a.USER_ID
+		FROM
+		sys_user a
+		WHERE
+		a.mt4_id = #{historyOrderDto.loginId}
+		),
+		#{historyOrderDto.createTime},
+		1 )
+	</insert>
+
+	<!-- 查询历史订单数量 -->
+	<select id="findCount" resultType="java.lang.Integer">
+		select count(*) from
+		t_history_order;
+	</select>
+
+	<!-- 查询历史订单图表 -->
+	<select id="findChart" resultType="com.blackbeard.common.dto.OrderChartDto"
+		parameterType="com.blackbeard.common.dto.HistoryOrderDto">
+		select t.symbol as name,sum(total) as value from t_history_order t
+		where t.stat=1
+		<if
+			test="historyOrderDto.openTimeStart!=null and historyOrderDto.openTimeStart!=''">
+			and t.open_time &gt;= #{historyOrderDto.openTimeStart}
+		</if>
+		<if
+			test="historyOrderDto.openTimeEnd!=null and historyOrderDto.openTimeEnd!=''">
+			and t.open_time &lt;= #{historyOrderDto.openTimeEnd}
+		</if>
+		GROUP BY t.symbol order by t.symbol desc;
+	</select>
+
+</mapper>

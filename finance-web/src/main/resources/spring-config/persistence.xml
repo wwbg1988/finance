@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd 
+       http://www.springframework.org/schema/aop  
+       http://www.springframework.org/schema/aop/spring-aop.xsd        
+       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<bean id="masterdataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${datasource.driverClassName}" />
+		<property name="url" value="${datasource.url}" />
+		<property name="username" value="${datasource.username}" />
+		<property name="password" value="${datasource.password}" />
+
+		<!-- Connection Pooling Info -->
+		<property name="initialSize" value="${initialSize}" />
+		<property name="maxActive" value="${maxActive}" />
+		<property name="maxIdle" value="${maxIdle}" />
+		<property name="maxWait" value="${maxWait}" />
+		<property name="poolPreparedStatements" value="true" />
+		<property name="defaultAutoCommit" value="false" />
+	</bean>
+
+	<bean id="slavedataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${slave.datasource.driverClassName}" />
+		<property name="url" value="${slave.datasource.url}" />
+		<property name="username" value="${slave.datasource.username}" />
+		<property name="password" value="${slave.datasource.password}" />
+
+		<!-- Connection Pooling Info -->
+		<property name="initialSize" value="${initialSize}" />
+		<property name="maxActive" value="${maxActive}" />
+		<property name="maxIdle" value="${maxIdle}" />
+		<property name="maxWait" value="${maxWait}" />
+		<property name="poolPreparedStatements" value="true" />
+		<property name="defaultAutoCommit" value="false" />
+	</bean>
+
+	<bean id="dataSource" class="com.ssic.base.datasource.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="master" value-ref="masterdataSource" />
+				<entry key="slave" value-ref="slavedataSource" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="masterdataSource" />
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation"
+			value="classpath:/com/blackbeard/admin/mapper/mybatis-config.xml"></property>
+		<property name="mapperLocations" value="classpath*:com/blackbeard/**/*Mapper.xml" />
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com/blackbeard/common/mapper" />
+	</bean>
+
+	<!-- 配置数据库注解aop -->
+	<aop:aspectj-autoproxy />
+	<bean id="manyDataSourceAspect" class="com.ssic.base.datasource.DataSourceAspect" />
+	<aop:config>
+		<aop:aspect id="c" ref="manyDataSourceAspect">
+			<aop:pointcut id="tx"
+				expression="execution(* com.blackbeard.common.mapper.*.*(..))" />
+			<aop:before pointcut-ref="tx" method="before" />
+		</aop:aspect>
+	</aop:config>
+
+	<!-- ================ Shiro start ================ -->
+		<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+			<property name="realm" ref="ShiroRealm" />
+		</bean>
+		
+		<!-- 項目自定义的Realm -->
+	    <bean id="ShiroRealm" class="com.blackbeard.admin.interceptor.shiro.ShiroRealm" ></bean>
+		
+		<!-- Shiro Filter -->
+		<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+			<property name="securityManager" ref="securityManager" />
+			
+			<property name="loginUrl" value="/" />
+			
+			<property name="successUrl" value="/main/index.do" />
+			
+			<property name="unauthorizedUrl" value="/login_toLogin.do" />
+			
+			<property name="filterChainDefinitions">
+				<value>
+				/web/kline/findKlineRecord.do  = anon
+				/web/order/findHistoryOrder.do = anon
+			    /web/order/findHistoryOrderByOrderNo.do = anon
+				/web/order/findOnlineOrder.do  = anon
+				/web/user/login.do          = anon
+				/web/user/add.do            = anon
+		        /web/user/toRegister.do     = anon
+		        /web/user/hasUser.do        = anon
+				/static/login/** 			= anon
+				/static/js/myjs/** 			= authc
+				/static/js/** 				= anon
+				/uploadFiles/uploadImgs/** 	= anon
+	           	/code.do 					= anon
+	           	/login_login.do	 			= anon
+	           	/app**/** 					= anon
+	           	/weixin/** 					= anon
+	           	/**							= authc
+				</value>
+			</property>
+		</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+</beans>
+

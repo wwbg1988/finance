@@ -1,0 +1,54 @@
+/* @group Base 
+自定义图片存放css文件
+*/
+.product-icon {
+	background: url('costom/product.png') no-repeat center center;
+	display:inline-block;
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+}
+.icon-iconfontgongjuxiang {
+	background: url('costom/iconfontgongjuxiang.png') no-repeat center center;
+	display:inline-block;
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+}
+.icontupianguanli-icon {
+	background: url('costom/icontupianguanli.png') no-repeat center center;
+	display:inline-block;
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+}
+.peicai-icon{
+	background: url('costom/peicai.png')no-repeat center center;
+	display:inline-block;
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+}
+.qiecai-icon {
+	background: url('costom/qiecai.png') no-repeat center center;
+	display:inline-block;
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+	margin-left:5px;
+	margin-top:7px
+}
+.renyuanguanli-icon {
+	background: url('costom/renyuanguanli.png') no-repeat center center;
+	display:inline-block;
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+}
+.shucai-icon {
+	background: url('costom/shucai.png') no-repeat center center;
+	display:inline-block;
+	height: 20px;
+	width: 20px;
+	background-size: 20px 20px;
+}
